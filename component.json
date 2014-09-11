@@ -2,7 +2,7 @@
   "name": "noflo-peer",
   "description": "NoFlo wrapper for peers/peerjs P2P audio, video, and data via WebRTC.",
   "author": "Forrest Oliphant",
-  "repo": "forresto/noflo-peer",
+  "repo": "noflo/noflo-peer",
   "version": "0.1.0",
   "keywords": [],
   "dependencies": {

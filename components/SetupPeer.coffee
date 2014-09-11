@@ -49,12 +49,10 @@ exports.getComponent = ->
       if c.key?
         options.key = c.key
       peer = c.peer = new Peer(options)
-      console.log peer, options
       peer.on 'error', (err) ->
         return unless c.outPorts.server_error.isAttached()
         c.sendServerError err
       peer.on 'open', (id) ->
-        console.log id
         c.id = id
         c.connections = {}
         if c.outPorts.id.isAttached()
@@ -69,10 +67,29 @@ exports.getComponent = ->
     process: (event, payload) ->
       return unless event is 'data'
       unless c.peer?
-        c.sendServerError "need to connect to server before connecting to peer"
+        c.sendServerError 'need to connect to server before connecting to peer'
         return
       connection = c.peer.connect payload
       c.setupConnection connection
+
+  c.inPorts.add 'send_peer',
+    datatype: 'all'
+    description: 'Send data to peer. Peer ID defined by group. If no group send to all connected.'
+    process: (event, payload) ->
+      console.log event, payload
+      # if event is 'group'
+      return unless event is 'data'
+      unless c.peer?
+        c.sendServerError 'need to connect to server before sending to peer'
+        return
+      # TODO if group defined, only send to that peer
+      sentCount = 0
+      for conn, id of c.connections
+        if conn.type is 'data' and conn.open
+          conn.send payload
+          sentCount++
+      if sentCount is 0
+        c.sendServerError 'no open peer connections'
 
   c.inPorts.add 'stream',
     datatype: 'object'

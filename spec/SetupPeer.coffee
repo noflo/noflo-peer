@@ -16,11 +16,12 @@ describe 'SetupPeer component', ->
 
   describe 'when instantiated', ->
     it 'should have correct input ports', ->
-      chai.expect(Object.keys(c.inPorts.ports).length).to.equal 8
+      chai.expect(Object.keys(c.inPorts.ports).length).to.equal 9
       chai.expect(c.inPorts.key).to.be.an 'object'
       chai.expect(c.inPorts.server).to.be.an 'object'
       chai.expect(c.inPorts.connect).to.be.an 'object'
       chai.expect(c.inPorts.connect_peer).to.be.an 'object'
+      chai.expect(c.inPorts.send_peer).to.be.an 'object'
       chai.expect(c.inPorts.stream).to.be.an 'object'
       chai.expect(c.inPorts.call_peer).to.be.an 'object'
       chai.expect(c.inPorts.answer_call).to.be.an 'object'
@@ -57,34 +58,55 @@ describe 'SetupPeer component', ->
       c.outPorts.server_error.attach server_error
     it 'should immediately error when try to connect to peer', ->
       server_error.once 'data', (err) ->
-        chai.expect(err).to.be.a 'string'
+        chai.expect(err).to.be.a 'string', err
       connect_peer.send 'abc'
     it 'should immediately error when try to call peer', ->
       server_error.once 'data', (err) ->
-        chai.expect(err).to.be.a 'string'
+        chai.expect(err).to.be.a 'string', err
       connect_peer.send 'abc'
     it 'should immediately error when trying to connect without key', ->
       server_error.once 'data', (err) ->
-        chai.expect(err).to.be.a 'string'
+        chai.expect(err).to.be.a 'string', err
       connect_peer.send 'abc'
 
   describe 'connecting to server', ->
-    it 'should get an id from the server', (done) ->
-      @timeout 10000
+    key = null
+    connect = null
+    send_peer = null
+    id = null
+    server_error = null
+
+    before ->
       key = noflo.internalSocket.createSocket()
       connect = noflo.internalSocket.createSocket()
+      send_peer = noflo.internalSocket.createSocket()
       id = noflo.internalSocket.createSocket()
       server_error = noflo.internalSocket.createSocket()
       c.inPorts.key.attach key
       c.inPorts.connect.attach connect
       c.outPorts.id.attach id
       c.outPorts.server_error.attach server_error
+
+    it 'should get an id from the server', (done) ->
+      @timeout 10000
       key.send 'lwjd5qra8257b9'
       id.once 'data', (id) ->
         chai.expect(id).to.be.a 'string'
         done()
-      server_error.on 'data', (err) ->
+      server_error.once 'data', (err) ->
         chai.expect(true).to.equal false, err
         done()
       connect.send()
 
+    describe 'before connecting to peer', ->
+
+      it 'should immediately error sending data to no peers', ->
+        server_error.once 'data', (err) ->
+          chai.expect(err).to.equal 'no open peer connections'
+        send_peer.send 'abc'
+
+      it 'should immediately error sending data to wrong peer id', ->
+        server_error.once 'data', (err) ->
+          chai.expect(err).to.equal 'no open peer connections'
+        send_peer.beginGroup 'abc'
+        send_peer.send 'abc'

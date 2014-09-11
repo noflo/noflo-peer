@@ -84,7 +84,7 @@ exports.getComponent = ->
         return
       # TODO if group defined, only send to that peer
       sentCount = 0
-      for conn, id of c.connections
+      for own id, conn of c.connections
         if conn.type is 'data' and conn.open
           conn.send payload
           sentCount++

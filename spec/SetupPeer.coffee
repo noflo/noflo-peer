@@ -5,6 +5,12 @@ unless noflo.isBrowser()
 else
   SetupPeer = require 'noflo-peer/components/SetupPeer.js'
 
+describe 'Browser check', ->
+  it 'should be a compatible browser', ->
+    peer = require('peerjs')
+    supports = peer.util.supports
+    chai.expect(supports.data).to.be.true
+
 describe 'SetupPeer component', ->
   c = null
   beforeEach ->
@@ -36,11 +42,6 @@ describe 'SetupPeer component', ->
       chai.expect(c.outPorts.close).to.be.an 'object'
       chai.expect(c.outPorts.server_error).to.be.an 'object'
       chai.expect(c.outPorts.peer_error).to.be.an 'object'
-    it 'should be a compatible browser', ->
-      p = require('peerjs')
-      supports = p.util.supports
-      chai.expect(supports.audioVideo).to.be.true
-      chai.expect(supports.data).to.be.true
 
   describe 'before connected to server', ->
     connect = null

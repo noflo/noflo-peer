@@ -9,6 +9,9 @@
     "noflo/noflo": "*",
     "forresto/component-peerjs": "*"
   },
+  "remotes": [
+    "https://raw.githubusercontent.com"
+  ],
   "scripts": [
     "index.js",
     "components/SetupPeer.coffee"

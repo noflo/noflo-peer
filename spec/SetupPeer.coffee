@@ -1,24 +1,26 @@
 noflo = require 'noflo'
 unless noflo.isBrowser()
-  chai = require 'chai' unless chai
-  SetupPeer = require '../components/SetupPeer.coffee'
+  chai = require 'chai'
+  path = require 'path'
+  baseDir = path.resolve __dirname, '../'
 else
-  SetupPeer = require 'noflo-peer/components/SetupPeer.js'
-
-describe 'Browser check', ->
-  it 'should be a compatible browser', ->
-    peer = require('peerjs')
-    supports = peer.util.supports
-    chai.expect(supports.data).to.be.true
+  baseDir = 'noflo-peer'
 
 describe 'SetupPeer component', ->
   c = null
-  beforeEach ->
-    c = SetupPeer.getComponent()
-    # ins = noflo.internalSocket.createSocket()
-    # out = noflo.internalSocket.createSocket()
-    # c.inPorts.in.attach ins
-    # c.outPorts.out.attach out
+  loader = null
+  before ->
+    loader = new noflo.ComponentLoader baseDir
+  beforeEach (done) ->
+    @timeout 4000
+    loader.load 'peer/SetupPeer', (err, instance) ->
+      return done err if err
+      c = instance
+      # ins = noflo.internalSocket.createSocket()
+      # out = noflo.internalSocket.createSocket()
+      # c.inPorts.in.attach ins
+      # c.outPorts.out.attach out
+      done()
 
   describe 'when instantiated', ->
     it 'should have correct input ports', ->
@@ -78,6 +80,7 @@ describe 'SetupPeer component', ->
     server_error = null
 
     before ->
+      return @skip() unless c.isSupported()
       key = noflo.internalSocket.createSocket()
       connect = noflo.internalSocket.createSocket()
       send_peer = noflo.internalSocket.createSocket()
@@ -100,6 +103,8 @@ describe 'SetupPeer component', ->
       connect.send()
 
     describe 'before connecting to peer', ->
+      before ->
+        return @skip() unless c.isSupported()
 
       it 'should immediately error sending data to no peers', ->
         server_error.once 'data', (err) ->

@@ -6,12 +6,6 @@ unless noflo.isBrowser()
 else
   baseDir = 'noflo-peer'
 
-describe 'Browser check', ->
-  it 'should be a compatible browser', ->
-    peer = require('peerjs')
-    supports = peer.util.supports
-    chai.expect(supports.data).to.be.true
-
 describe 'SetupPeer component', ->
   c = null
   loader = null
@@ -86,6 +80,7 @@ describe 'SetupPeer component', ->
     server_error = null
 
     before ->
+      return @skip() unless c.isSupported()
       key = noflo.internalSocket.createSocket()
       connect = noflo.internalSocket.createSocket()
       send_peer = noflo.internalSocket.createSocket()
@@ -108,6 +103,8 @@ describe 'SetupPeer component', ->
       connect.send()
 
     describe 'before connecting to peer', ->
+      before ->
+        return @skip() unless c.isSupported()
 
       it 'should immediately error sending data to no peers', ->
         server_error.once 'data', (err) ->

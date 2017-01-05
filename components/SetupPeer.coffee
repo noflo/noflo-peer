@@ -1,7 +1,7 @@
 # @runtime noflo-browser
 
 noflo = require 'noflo'
-Peer = require('peerjs').Peer
+Peer = require('peerjs')
 
 exports.getComponent = ->
   c = new noflo.Component
@@ -216,6 +216,9 @@ exports.getComponent = ->
     return unless out.isAttached()
     out.send err
 
+  c.isSupported = ->
+    utils = require 'peerjs/lib/util'
+    return utils.supports.data
 
   # Finally return the component instance
   c

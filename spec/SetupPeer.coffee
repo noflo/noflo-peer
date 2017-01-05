@@ -1,9 +1,10 @@
 noflo = require 'noflo'
 unless noflo.isBrowser()
-  chai = require 'chai' unless chai
-  SetupPeer = require '../components/SetupPeer.coffee'
+  chai = require 'chai'
+  path = require 'path'
+  baseDir = path.resolve __dirname, '../'
 else
-  SetupPeer = require 'noflo-peer/components/SetupPeer.js'
+  baseDir = 'noflo-peer'
 
 describe 'Browser check', ->
   it 'should be a compatible browser', ->
@@ -13,12 +14,19 @@ describe 'Browser check', ->
 
 describe 'SetupPeer component', ->
   c = null
-  beforeEach ->
-    c = SetupPeer.getComponent()
-    # ins = noflo.internalSocket.createSocket()
-    # out = noflo.internalSocket.createSocket()
-    # c.inPorts.in.attach ins
-    # c.outPorts.out.attach out
+  loader = null
+  before ->
+    loader = new noflo.ComponentLoader baseDir
+  beforeEach (done) ->
+    @timeout 4000
+    loader.load 'peer/SetupPeer', (err, instance) ->
+      return done err if err
+      c = instance
+      # ins = noflo.internalSocket.createSocket()
+      # out = noflo.internalSocket.createSocket()
+      # c.inPorts.in.attach ins
+      # c.outPorts.out.attach out
+      done()
 
   describe 'when instantiated', ->
     it 'should have correct input ports', ->
